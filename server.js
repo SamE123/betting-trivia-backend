@@ -8,7 +8,7 @@
   const app = express();
 
   app.use(cors({
-    origin: 'https://same123.github.io/betting-trivia/',
+    origin: 'https://same123.github.io',
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
   }));
