@@ -8,7 +8,7 @@
   const app = express();
 
   app.use(cors({
-    origin: 'process.env.PORT',
+    origin: 'http://localhost:4200',
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
   }));
@@ -681,8 +681,3 @@ function sendScoreboard() {
 
 });
   
-
-  
-  
-
-
