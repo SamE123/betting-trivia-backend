@@ -8,7 +8,7 @@
   const app = express();
 
   app.use(cors({
-    origin: 'http://localhost:4200',
+    origin: 'https://same123.github.io/betting-trivia/',
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
   }));
@@ -596,6 +596,7 @@ function sendScoreboard() {
         }
       })
       .on('end', () => {
+        console.log("All loading categories complete");
         const categories = Array.from(allCategories);
         const subcategories = Array.from(allSubcategories);
         res.json({ categories, subcategories });
