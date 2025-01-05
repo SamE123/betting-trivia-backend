@@ -112,9 +112,9 @@
         }
       }
 
-      // Keep stake at 100 for first 2s, then decrement to 25
-      if (elapsedMs >= 2000 && stakeRemaining > 25) {
-        stakeRemaining--;
+      // Keep stake at 100 for first 3s, then decrement to 25
+      if (elapsedMs >= 3000 && stakeRemaining > 26) {
+        stakeRemaining-=2;
       }
 
       broadcastGameState();
