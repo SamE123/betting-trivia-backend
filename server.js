@@ -626,7 +626,7 @@ function sendScoreboard() {
     skipFirstElimination = false;
     currentQuestion = null; 
     newQuestion = false; 
-
+    systemMessage = `After a player reaches ${globalPhaseThreshold}, sudden death will begin.`
     const questionsFilePath = './data/questions.csv'; // Path to the CSV file
     const loadedQuestions = [];
 
