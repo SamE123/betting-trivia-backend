@@ -187,9 +187,6 @@
     stopGlobalInterval();
   }
 
-  
-  
-
   function eliminateLowestScorer() {
     // Only consider players who are NOT eliminated and answered incorrectly
     const incorrectPlayers = players.filter((p) => !p.eliminated && p.correct === false);
@@ -700,7 +697,6 @@ function sendScoreboard() {
     });
   
     gameStarted = false;
-    questions = []; // Clear questions
     questionIndex = 0;
     currentQuestion = null;
     winner = null;
