@@ -704,7 +704,7 @@ function sendScoreboard() {
     console.log("Resetting game");
     console.log("Question index is...");
     console.log(questionIndex);
-    this.questionIndex = questionIndex+1;
+    questionIndex = questionIndex+1;
 
     players.forEach((player) => {
       player.score = 4; // Reset score to default
