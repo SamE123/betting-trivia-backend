@@ -430,6 +430,7 @@
           // reassign host if we still have players
           reassignHost();
         }
+
         broadcastGameState();
       }
     });
@@ -613,6 +614,9 @@ app.post('/update-settings', (req, res) => {
         res.status(500).json({ error: 'Error loading questions' });
       });
 
+      questionIndex = 0;
+
+
   } else {
     console.log('Categories and subcategories unchanged. Skipping reload.');
     res.json({ message: 'Settings updated successfully, but questions remain unchanged.' });
@@ -697,7 +701,6 @@ function sendScoreboard() {
     });
   
     gameStarted = false;
-    questionIndex = 0;
     currentQuestion = null;
     winner = null;
     isEliminationPhase = false;
