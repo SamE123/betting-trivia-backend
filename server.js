@@ -203,7 +203,8 @@
   
     // Find all players with that minimum score
     const lowestScorers = incorrectPlayers.filter((p) => p.score === minScore);
-  
+    const alivePlayers = players.filter((p) => !p.eliminated);
+
     // If all incorrect players are tied at the lowest score, skip elimination
     if (lowestScorers.length === incorrectPlayers.length && incorrectPlayers.length == this.alivePlayers.length) {
       console.log('All incorrect players are tied for the lowest score. No one is eliminated.');
@@ -707,7 +708,7 @@ function sendScoreboard() {
     questionIndex = questionIndex+1;
 
     players.forEach((player) => {
-      player.score = 4; // Reset score to default
+      player.score = 4; // Reset score to default 
       player.eliminated = false; // Make all players active
     });
   
