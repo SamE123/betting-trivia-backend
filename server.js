@@ -358,6 +358,9 @@
         console.error('Error reading file:', err);
         res.status(500).json({ error: 'Error loading questions' });
       });
+
+      questionIndex = 0;
+
   });
 
   //=============================
@@ -382,7 +385,6 @@
     });
   
     winner = null;
-    questionIndex = 0;
     currentQuestion = questions[questionIndex];
     timeRemaining = 10;
     stakeRemaining = 100;
