@@ -374,6 +374,8 @@
     currentQuestion = questions[questionIndex];
     timeRemaining = 10;
     stakeRemaining = 100;
+    systemMessage = `After a player reaches ${globalPhaseThreshold}, sudden death will begin.`
+
   
     // Pause for 1 second before starting the game
     setTimeout(() => {
