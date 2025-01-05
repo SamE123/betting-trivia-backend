@@ -248,6 +248,9 @@
       questionIndex = 0; // or end the game
     }
 
+    console.log("Asking question at index...");
+    console.log(questionIndex);
+
     currentQuestion = questions[questionIndex];
     players.forEach((p) => {
       p.answer = undefined;
@@ -701,6 +704,7 @@ function sendScoreboard() {
     console.log("Resetting game");
     console.log("Question index is...");
     console.log(questionIndex);
+    this.questionIndex = questionIndex+1;
 
     players.forEach((player) => {
       player.score = 4; // Reset score to default
