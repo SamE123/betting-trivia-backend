@@ -34,6 +34,9 @@
   let globalPhaseThreshold = 50;
   let isBroadcasting = false;
   let newQuestion = false; 
+  let previousCategories = [];
+  let previousSubcategories = [];
+
 
   // SSE tracking
   let sseClients = {};  
@@ -183,31 +186,42 @@
   
     stopGlobalInterval();
   }
+
+  
   
 
   function eliminateLowestScorer() {
-    // Only consider players who are NOT eliminated
-    const alivePlayers = players.filter((p) => !p.eliminated);
+    // Only consider players who are NOT eliminated and answered incorrectly
+    const incorrectPlayers = players.filter((p) => !p.eliminated && p.correct === false);
   
-    // Find the minimum score among non-eliminated players
-    const minScore = Math.min(...alivePlayers.map((p) => p.score));
-  
-    // Find all players with that minimum score
-    const lowestScorers = alivePlayers.filter((p) => p.score === minScore);
-  
-    // If eliminating all tied players would leave no one, do not eliminate anyone
-    if (lowestScorers.length === alivePlayers.length) {
-      console.log('All players are tied for lowest score. No one is eliminated.');
+    if (incorrectPlayers.length === 0) {
+      console.log('No players answered incorrectly. No one is eliminated.');
+      systemMessage = 'No players answered incorrectly. No elimination this round.';
+      broadcastGameState();
       return;
     }
   
-    // Eliminate all players tied for the lowest score
+    // Find the minimum score among players who answered incorrectly
+    const minScore = Math.min(...incorrectPlayers.map((p) => p.score));
+  
+    // Find all players with that minimum score
+    const lowestScorers = incorrectPlayers.filter((p) => p.score === minScore);
+  
+    // If all incorrect players are tied at the lowest score, skip elimination
+    if (lowestScorers.length === incorrectPlayers.length) {
+      console.log('All incorrect players are tied for the lowest score. No one is eliminated.');
+      systemMessage = 'All incorrect players are tied for the lowest score. No elimination this round.';
+      broadcastGameState();
+      return;
+    }
+  
+    // Eliminate all players tied for the lowest score among incorrect answers
     lowestScorers.forEach((player) => {
       player.eliminated = true;
-      console.log(`Eliminated player: ${player.name}`);
+      systemMessage = `${player.name} had the lowest score of those who answered wrong! ${player.name} has been eliminated.`;
+      console.log(`Eliminated player: ${player.name} (score: ${player.score})`);
     });
   
-    // Optionally broadcast updated game state after elimination
     broadcastGameState();
   }
   
@@ -220,6 +234,7 @@
       winner = alivePlayers[0].name;
       console.log(`Winner is: ${winner}`);
       systemMessage = 'Game over. Play again?';
+      isEliminationPhase = false; 
       gameStarted = false; 
       broadcastGameState(); // Ensure winning state is broadcast
     } else {
@@ -533,16 +548,81 @@ app.post('/update-settings', (req, res) => {
   globalCategories = selectedCategories || [];
   globalSubcategories = selectedSubcategories || [];
 
-  console.log('Settings updated:', {
+  console.log('Settings update received:', {
     phaseThreshold: globalPhaseThreshold,
     selectedCategories: globalCategories,
     selectedSubcategories: globalSubcategories,
   });
 
-  systemMessage = `After a player reaches ${globalPhaseThreshold}, sudden death will begin.`; // Default message
-  res.json({ message: 'Settings updated successfully' });
-  broadcastGameState()
+  // Compare previous categories and subcategories with the new ones
+  const categoriesChanged = JSON.stringify(previousCategories) !== JSON.stringify(globalCategories);
+  const subcategoriesChanged = JSON.stringify(previousSubcategories) !== JSON.stringify(globalSubcategories);
 
+  if (categoriesChanged || subcategoriesChanged) {
+    console.log('Categories or subcategories have changed. Reloading questions...');
+    
+    // Reload questions if there's a change in categories/subcategories
+    const questionsFilePath = './data/questions.csv'; // Path to the CSV file
+    const loadedQuestions = [];
+
+    fs.createReadStream(questionsFilePath)
+      .pipe(csvParser())
+      .on('data', (row) => {
+        try {
+          const answers = [
+            row['Correct Answer'],
+            row['Answer2'],
+            row['Answer3'],
+            row['Answer4']
+          ];
+          const correctAnswer = answers[0];
+          shuffleArray(answers); // Shuffle answers to randomize order
+
+          // Push a question object with all required properties
+          loadedQuestions.push({
+            caption: row['Question'],
+            image: row['Img'],
+            answers, // Shuffled answers
+            correct: correctAnswer,
+            subcategory: row['Subcategory'],
+            category: row['Category'],
+            difficulty: row['Difficulty']
+          });
+        } catch (err) {
+          console.error('Error parsing row:', err);
+        }
+      })
+      .on('end', () => {
+        questions = loadedQuestions; // Update global questions array
+
+        // Filter questions based on host settings if applied
+        if (globalCategories?.length > 0 || globalSubcategories?.length > 0) {
+          questions = questions.filter((q) =>
+            (globalCategories.includes(q.category) || globalSubcategories.includes(q.subcategory))
+          );
+        }
+
+        shuffleArray(questions); // Shuffle questions for random order
+
+        // Update the previous values **after** loading
+        previousCategories = [...globalCategories]; 
+        previousSubcategories = [...globalSubcategories];
+
+        broadcastGameState(); // Notify all clients of the updated game state
+        res.json({ message: 'Questions loaded successfully', questions });
+      })
+      .on('error', (err) => {
+        console.error('Error reading file:', err);
+        res.status(500).json({ error: 'Error loading questions' });
+      });
+
+  } else {
+    console.log('Categories and subcategories unchanged. Skipping reload.');
+    res.json({ message: 'Settings updated successfully, but questions remain unchanged.' });
+  }
+
+  systemMessage = `After a player reaches ${globalPhaseThreshold}, sudden death will begin.`;
+  broadcastGameState(); // Always broadcast updated settings
 });
 
 
@@ -633,53 +713,6 @@ function sendScoreboard() {
     const loadedQuestions = [];
 
   
-    //reload questions
-    fs.createReadStream(questionsFilePath)
-    .pipe(csvParser())
-    .on('data', (row) => {
-      try {
-        const answers = [
-          row['Correct Answer'],
-          row['Answer2'],
-          row['Answer3'],
-          row['Answer4']
-        ];
-        const correctAnswer = answers[0];
-        shuffleArray(answers); // Shuffle answers to randomize order
-
-        // Push a question object with all required properties
-        loadedQuestions.push({
-          caption: row['Question'],
-          image: row['Img'],
-          answers, // Shuffled answers
-          correct: correctAnswer,
-          subcategory: row['Subcategory'],
-          category: row['Category'],
-          difficulty: row['Difficulty']
-        });
-      } catch (err) {
-        console.error('Error parsing row:', err);
-      }
-    })
-    .on('end', () => {
-      questions = loadedQuestions; // Update global questions array
-
-      // Optionally, filter questions based on host settings if applied
-      if (globalCategories?.length > 0 || globalSubcategories?.length > 0) {
-        questions = questions.filter((q) =>
-          (globalCategories.includes(q.category) || globalSubcategories.includes(q.subcategory))
-        );
-      }
-
-      shuffleArray(questions); // Shuffle questions for random order
-      broadcastGameState(); // Notify all clients of the updated game state
-      res.json({ message: 'Questions loaded successfully', questions });
-    })
-    .on('error', (err) => {
-      console.error('Error reading file:', err);
-      res.status(500).json({ error: 'Error loading questions' });
-    });
-
     console.log("Resetting game finished");
 
 });
