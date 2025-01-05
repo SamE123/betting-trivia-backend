@@ -113,7 +113,7 @@
       }
 
       // Keep stake at 100 for first 3s, then decrement to 25
-      if (elapsedMs >= 3000 && stakeRemaining > 26) {
+      if (elapsedMs >= 3000 && stakeRemaining > 10) {
         stakeRemaining-=2;
       }
 
@@ -137,7 +137,7 @@
       if (!player.eliminated) {
         if (player.answer === undefined) {
           player.answer = 'No Answer';
-          player.stake = 25;
+          player.stake = 10;
         }
         scorePlayer(player, currentQuestion?.correct);
       }
