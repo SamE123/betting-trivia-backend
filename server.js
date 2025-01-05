@@ -383,6 +383,9 @@
       p.stake = undefined;
       p.correct = undefined;
     });
+
+    console.log("Starting game with questionIndex of...");
+    console.log(questionIndex);
   
     winner = null;
     currentQuestion = questions[questionIndex];
@@ -694,8 +697,10 @@ function sendScoreboard() {
 
   app.post('/reset-game', (req, res) => {
     // Reset global game state
-
+    
     console.log("Resetting game");
+    console.log("Question index is...");
+    console.log(questionIndex);
 
     players.forEach((player) => {
       player.score = 4; // Reset score to default
