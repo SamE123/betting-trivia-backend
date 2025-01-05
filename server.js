@@ -205,7 +205,7 @@
     const lowestScorers = incorrectPlayers.filter((p) => p.score === minScore);
   
     // If all incorrect players are tied at the lowest score, skip elimination
-    if (lowestScorers.length === incorrectPlayers.length) {
+    if (lowestScorers.length === incorrectPlayers.length && incorrectPlayers.length == alivePlayers.length) {
       console.log('All incorrect players are tied for the lowest score. No one is eliminated.');
       systemMessage = 'All incorrect players are tied for the lowest score. No elimination this round.';
       broadcastGameState();
