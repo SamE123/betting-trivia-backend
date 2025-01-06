@@ -170,6 +170,7 @@
           // Perform elimination
           console.log('Elimination phase is active. Eliminating the lowest scorer...');
           eliminateLowestScorer();
+          broadcastGameState();
         }
       }
   
@@ -207,9 +208,10 @@
 
     // If all incorrect players are tied at the lowest score, skip elimination
     if (lowestScorers.length === incorrectPlayers.length && incorrectPlayers.length == alivePlayers.length) {
-      console.log('All incorrect players are tied for the lowest score. No one is eliminated.');
-      systemMessage = 'All incorrect players are tied for the lowest score. No elimination this round.';
-      broadcastGameState();
+      console.log('All players failed to guess correctly. No one is eliminated.');
+      systemMessage = 'All players failed to guess correctly. No one is eliminated.';      
+      //broadcastGameState();
+
       return;
     }
   
@@ -220,7 +222,7 @@
       console.log(`Eliminated player: ${player.name} (score: ${player.score})`);
     });
   
-    broadcastGameState();
+    //broadcastGameState();
   }
   
 
