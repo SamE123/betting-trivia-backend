@@ -149,7 +149,7 @@
     // Check if elimination phase should begin
     if (!isEliminationPhase && anyPlayerOverThreshold && alivePlayers.length > 1) {
       console.log(`At least one player passed ${globalPhaseThreshold}. Entering ELIMINATION MODE.`);
-      systemMessage = 'The player with the lowest score will be eliminated after this round.';
+      systemMessage = 'The incorrect player with the lowest score will be eliminated.';
       isEliminationPhase = true;
       skipFirstElimination = true; // Skip the first elimination
     }
@@ -168,7 +168,7 @@
           skipFirstElimination = false; // Reset after skipping
         } else {
           // Perform elimination
-          console.log('Elimination phase is active. Eliminating the lowest scorer...');
+          console.log('Elimination phase is active. Eliminating the lowest scoring incorrect player...');
           eliminateLowestScorer();
           broadcastGameState();
         }
@@ -209,7 +209,7 @@
     // If all incorrect players are tied at the lowest score, skip elimination
     if (lowestScorers.length === incorrectPlayers.length && incorrectPlayers.length == alivePlayers.length) {
       console.log('All players failed to guess correctly. No one is eliminated.');
-      systemMessage = 'All players failed to guess correctly. No one is eliminated.';      
+      systemMessage = 'All players are in the game are incorrect and tied. No one is eliminated.';      
       //broadcastGameState();
 
       return;
@@ -218,7 +218,14 @@
     // Eliminate all players tied for the lowest score among incorrect answers
     lowestScorers.forEach((player) => {
       player.eliminated = true;
+
+      if(incorrectPlayers.length == 1){
       systemMessage = `${player.name} had the lowest score of those who answered wrong! ${player.name} has been eliminated.`;
+      }
+      else{
+      systemMessage = `$Multiple players were tied and answered wrong! All those players have been eliminated.`;
+      }
+      broadcastGameState();
       console.log(`Eliminated player: ${player.name} (score: ${player.score})`);
     });
   
@@ -263,6 +270,10 @@
 
     timeRemaining = 10;
     stakeRemaining = 100;
+    if(this.isEliminationPhase){
+      this.systemMessage = "Incorrect players with low scores will be eliminated..."
+    }
+
     startGlobalInterval();
     broadcastGameState();
   }
