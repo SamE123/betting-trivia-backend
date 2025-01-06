@@ -36,7 +36,7 @@
   let newQuestion = false; 
   let previousCategories = [];
   let previousSubcategories = [];
-  let showAnswers = []; 
+  let showAnswers = false; 
 
 
   // SSE tracking
@@ -191,8 +191,6 @@
       // Move to the next question
       nextQuestion();
     }, 4000);
-  
-    stopGlobalInterval();
   }
 
   function eliminateLowestScorer() {
@@ -500,7 +498,7 @@
   
     if (answeredPlayers.length === activePlayers.length) {
       console.log("All players have submitted answers. Finalizing question...");
-      stopGlobalInterval();
+        stopGlobalInterval();
       finalizeQuestion();  // Advance to the next question
     }
   
