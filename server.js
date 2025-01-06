@@ -125,6 +125,7 @@
     if (globalIntervalId) {
       clearInterval(globalIntervalId);
       globalIntervalId = null;
+      console.log("Global timer stopped.");
     }
   }
 
@@ -219,11 +220,11 @@
     lowestScorers.forEach((player) => {
       player.eliminated = true;
 
-      if(incorrectPlayers.length == 1){
+      if(lowestScorers.length == 1){
       systemMessage = `${player.name} had the lowest score of those who answered wrong! ${player.name} has been eliminated.`;
       }
       else{
-      systemMessage = `$Multiple players were tied and answered wrong! All those players have been eliminated.`;
+      systemMessage = `Multiple players were tied and answered wrong! All those players have been eliminated.`;
       }
       broadcastGameState();
       console.log(`Eliminated player: ${player.name} (score: ${player.score})`);
@@ -465,11 +466,10 @@
   //    Choose Answer
   //=============================
   app.post('/choose-answer', (req, res) => {
-
-    console.log("answer received")
-    console.log("answer is...")
-    console.log(req.body)
-
+    console.log("Answer received");
+    console.log("Answer is...");
+    console.log(req.body);
+  
     const { playerName, stake, answer } = req.body;
     const player = players.find((p) => p.name === playerName);
   
@@ -477,19 +477,29 @@
       return res.status(404).send('Player not found');
     }
     if (player.eliminated) {
-      return;
-     // return res.status(403).json({ error: 'You have been eliminated and cannot answer.' });
+      return res.status(403).json({ error: 'You have been eliminated and cannot answer.' });
     }
   
-    // If not eliminated, record the answer
+    // Record the player's answer
     player.stake = stake;
     player.answer = answer;
     player.correct = undefined;
   
     broadcastGameState();
+  
+    // Check if all active (non-eliminated) players have answered
+    const activePlayers = players.filter((p) => !p.eliminated);
+    const answeredPlayers = activePlayers.filter((p) => p.answer !== undefined);
+  
+    if (answeredPlayers.length === activePlayers.length) {
+      console.log("All players have submitted answers. Finalizing question...");
+      stopGlobalInterval();
+      finalizeQuestion();  // Advance to the next question
+    }
+  
     res.json({ message: 'Answer recorded' });
   });
-  
+    
   //=============================
   //    Add Player
   //=============================
