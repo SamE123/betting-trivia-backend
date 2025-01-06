@@ -36,6 +36,7 @@
   let newQuestion = false; 
   let previousCategories = [];
   let previousSubcategories = [];
+  let showAnswers = []; 
 
 
   // SSE tracking
@@ -60,7 +61,7 @@
     const gameState = {
         players: players.map((player) => ({
             ...player,
-            answer: player.answer !== undefined && timeRemaining > 0 ? "Answered" : player.answer,
+            answer: player.answer !== undefined && !showAnswers ? "Answered" : player.answer,
             eliminated: player.eliminated,
         })),
         questionsLoaded: questions.length > 0,
@@ -132,7 +133,9 @@
   //    Finalize & Next Question
   //=============================
   function finalizeQuestion() {
-    // Score everyone (only if they're not eliminated)
+    // Score everyone (only if they're not eliminated
+    
+
     players.forEach((player) => {
       if (!player.eliminated) {
         if (player.answer === undefined) {
@@ -140,11 +143,13 @@
           player.stake = 10;
         }
 
-        broadcastGameState();
         scorePlayer(player, currentQuestion?.correct);
       }
     });
-  
+    
+    this.showAnswers;
+    broadcastGameState(); 
+
     const alivePlayers = players.filter((p) => !p.eliminated);
     const anyPlayerOverThreshold = alivePlayers.some((p) => p.score > globalPhaseThreshold);
   
@@ -185,7 +190,7 @@
   
       // Move to the next question
       nextQuestion();
-    }, 3000);
+    }, 4000);
   
     stopGlobalInterval();
   }
