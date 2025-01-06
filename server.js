@@ -117,7 +117,6 @@
         stakeRemaining-=2;
       }
 
-      broadcastGameState();
     }, 100);
   }
 
@@ -140,6 +139,8 @@
           player.answer = 'No Answer';
           player.stake = 10;
         }
+
+        broadcastGameState();
         scorePlayer(player, currentQuestion?.correct);
       }
     });
