@@ -147,7 +147,7 @@
       }
     });
     
-    this.showAnswers;
+    this.showAnswers = true;
     broadcastGameState(); 
 
     const alivePlayers = players.filter((p) => !p.eliminated);
@@ -260,6 +260,7 @@
   
   
   function nextQuestion() {
+    this.showAnswers = false; 
     questionIndex++;
     if (questionIndex >= questions.length) {
       questionIndex = 0; // or end the game
